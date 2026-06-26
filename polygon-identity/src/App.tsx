@@ -11,7 +11,6 @@ type Settings = {
   fontWeight: number;
   fontSize: number;
   strokeWidth: number;
-  animationSpeed: number;
   maskEnabled: boolean;
   maskScale: number;
 };
@@ -24,9 +23,9 @@ const initialPoints: Point[] = [
   { x: 235, y: 625 },
 ];
 const initialSettings: Settings = {
-  backgroundColor: "#282d26", foregroundColor: "#f4f1de", transparentBackground: false,
+  backgroundColor: "#282d26", foregroundColor: "#f5f5f5", transparentBackground: false,
   filled: false, fontWeight: 400, fontSize: 32, strokeWidth: 3,
-  animationSpeed: 54, maskEnabled: false, maskScale: 100,
+  maskEnabled: false, maskScale: 100,
 };
 const initialTexts = ["Estúdio", "Vinícius", "Macêdo"];
 
@@ -44,8 +43,6 @@ function pointInPolygon(point: Point, vertices: Point[]) {
   }, false);
 }
 const colorOptions = [
-  { label: "Black", value: "#000000" },
-  { label: "White", value: "#ffffff" },
   { label: "Moss Green", value: "#282d26" },
   { label: "Soft Orange", value: "#ecbe93" },
   { label: "Grey Blue", value: "#20262d" },
@@ -199,7 +196,7 @@ export default function App() {
   };
   const randomizeShape = () => {
     const target = randomShape(texts, settings.fontSize, settings.strokeWidth); if (!target) return; const start = points.map((point) => ({ ...point })); const proxy = { progress: 0 };
-    gsap.to(proxy, { progress: 1, duration: 0.25 + (100 - settings.animationSpeed) / 70, ease: "power3.out", onUpdate: () => setPoints(start.map((point, index) => ({ x: point.x + (target[index].x - point.x) * proxy.progress, y: point.y + (target[index].y - point.y) * proxy.progress }))), onComplete: () => setPoints(target) });
+    gsap.to(proxy, { progress: 1, duration: 1.05, ease: "power3.out", onUpdate: () => setPoints(start.map((point, index) => ({ x: point.x + (target[index].x - point.x) * proxy.progress, y: point.y + (target[index].y - point.y) * proxy.progress }))), onComplete: () => setPoints(target) });
   };
   const labelsFor = (renderPoints: Point[]) => assignLabels(renderPoints, texts, settings.fontSize, settings.strokeWidth);
   const renderMarkup = (renderPoints: Point[]) => {
@@ -226,13 +223,13 @@ export default function App() {
   const control = (label: string, input: React.ReactNode) => <label className="control" htmlFor={controlId(label)}><span>{label}</span>{input}</label>;
   const uploadMask = (event: React.ChangeEvent<HTMLInputElement>) => { const file = event.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => setMaskImage(String(reader.result)); reader.readAsDataURL(file); };
 
-  return <main className="app" style={{ background: settings.backgroundColor }}><aside className="panel"><div className="panel-heading"><p>Polygon Identity</p><span>SVG generator</span></div>
+  return <main className="app" style={{ background: settings.backgroundColor }}><aside className="panel"><div className="panel-heading"><p>Estúdio Vinícius Macêdo</p><span>SVG generator</span></div>
     <section><h2>Shape</h2><label className="toggle"><input type="checkbox" checked={settings.filled} onChange={(event) => updateSetting("filled", event.target.checked)} /><span>Fill Shape</span></label>{control("Stroke Width", <input id="stroke-width" type="range" min="0" max="3" value={settings.strokeWidth} onChange={(event) => updateSetting("strokeWidth", Number(event.target.value))} />)}</section>
     <section><h2>Typography</h2>{control("Font Weight", <input id="font-weight" type="number" min="300" max="500" step="100" value={settings.fontWeight} onChange={(event) => updateSetting("fontWeight", Number(event.target.value))} />)}{control("Font Size", <input id="font-size" type="number" min="30" max="40" value={settings.fontSize} onChange={(event) => updateSetting("fontSize", Number(event.target.value))} />)}</section>
     <section><h2>Colors</h2>{control("Background Color", <select id="background-color" value={settings.backgroundColor} onChange={(event) => updateSetting("backgroundColor", event.target.value)}>{colorOptions.map((color) => <option key={color.value} value={color.value}>{color.label}</option>)}</select>)}<label className="toggle"><input type="checkbox" checked={settings.transparentBackground} onChange={(event) => updateSetting("transparentBackground", event.target.checked)} /><span>Transparent PNG Background</span></label>{control("Identity Color", <select id="identity-color" value={settings.foregroundColor} onChange={(event) => updateSetting("foregroundColor", event.target.value)}>{colorOptions.map((color) => <option key={color.value} value={color.value}>{color.label}</option>)}</select>)}</section>
     <section><h2>Texts</h2>{texts.map((text, index) => <div key={index}>{control(`Texto ${index + 1}`, <input id={`texto-${index + 1}`} value={text} onChange={(event) => setTexts((current) => current.map((value, textIndex) => textIndex === index ? event.target.value : value))} />)}</div>)}</section>
-    <section><h2>Image Mask</h2><label className="toggle"><input type="checkbox" checked={settings.maskEnabled} onChange={(event) => updateSetting("maskEnabled", event.target.checked)} /><span>Enable Mask Layer</span></label><label className="file-input"><ImagePlus size={16} /><span>{maskImage ? "Replace Image" : "Add Image"}</span><input type="file" accept="image/*" onChange={uploadMask} /></label>{control("Mask Scale", <input id="mask-scale" type="range" min="50" max="180" value={settings.maskScale} onChange={(event) => updateSetting("maskScale", Number(event.target.value))} />)}</section>
-    <section><h2>Motion</h2>{control("Animation Speed", <input id="animation-speed" type="range" min="0" max="100" value={settings.animationSpeed} onChange={(event) => updateSetting("animationSpeed", Number(event.target.value))} />)}<button className="action" onClick={randomizeShape}><Shuffle size={16} />Randomize Shape</button></section>
-    <section className="exports"><h2>Export</h2><button onClick={exportSvg}><Download size={16} />Export SVG</button><button onClick={exportPng}><ImageDown size={16} />Export PNG</button><button onClick={exportMp4}><FileVideo size={16} />Export MP4</button></section>
+    <section><h2>Image Mask</h2><label className="toggle"><input type="checkbox" checked={settings.maskEnabled} onChange={(event) => updateSetting("maskEnabled", event.target.checked)} /><span>Enable Mask Layer</span></label><label className="icon-button file-input" title={maskImage ? "Replace Image" : "Add Image"} aria-label={maskImage ? "Replace Image" : "Add Image"}><ImagePlus size={12} /><span>{maskImage ? "Replace Image" : "Add Image"}</span><input type="file" accept="image/*" onChange={uploadMask} /></label>{control("Mask Scale", <input id="mask-scale" type="range" min="50" max="180" value={settings.maskScale} onChange={(event) => updateSetting("maskScale", Number(event.target.value))} />)}</section>
+    <section><h2>Motion</h2><button className="icon-button action" onClick={randomizeShape} title="Randomize Shape" aria-label="Randomize Shape"><Shuffle size={12} /><span>Randomize Shape</span></button></section>
+    <section className="exports"><h2>Export</h2><button className="icon-button" onClick={exportSvg} title="Export SVG" aria-label="Export SVG"><Download size={12} /><span>Export SVG</span></button><button className="icon-button" onClick={exportPng} title="Export PNG" aria-label="Export PNG"><ImageDown size={12} /><span>Export PNG</span></button><button className="icon-button" onClick={exportMp4} title="Export MP4" aria-label="Export MP4"><FileVideo size={12} /><span>Export MP4</span></button></section>
   </aside><section className="stage"><svg ref={svgRef} viewBox={`0 0 ${viewBox.width} ${viewBox.height}`} role="img" aria-label="Dynamic polygon identity" onPointerMove={movePointer} onPointerUp={() => { setActivePoint(null); setDraggingMask(false); }} onPointerLeave={() => { setActivePoint(null); setDraggingMask(false); }} style={{ background: settings.transparentBackground ? "transparent" : settings.backgroundColor }}><defs><clipPath id={maskId}><polygon points={polygonPath(points)} /></clipPath></defs><polygon points={polygonPath(points)} fill={settings.filled ? settings.foregroundColor : "transparent"} stroke={settings.strokeWidth === 0 ? "transparent" : settings.foregroundColor} strokeWidth={settings.strokeWidth} strokeLinejoin="round" />{labels.map((assignment) => texts[assignment.textIndex] && <text key={`${assignment.textIndex}-${texts[assignment.textIndex]}`} x={assignment.label.x} y={assignment.label.y} fill={settings.foregroundColor} fontFamily="PP Neue Montreal, Inter, Arial, sans-serif" fontWeight={settings.fontWeight} fontSize={settings.fontSize} letterSpacing="1" textAnchor={assignment.label.textAnchor} dominantBaseline="middle" transform={`rotate(${assignment.label.angle} ${assignment.label.x} ${assignment.label.y})`}>{texts[assignment.textIndex]}</text>)}{settings.maskEnabled && maskImage && <image href={maskImage} x={maskPosition.x + (viewBox.width - settings.maskScale * 10) / 2} y={maskPosition.y + (viewBox.height - settings.maskScale * 10) / 2} width={settings.maskScale * 10} height={settings.maskScale * 10} preserveAspectRatio="xMidYMid slice" clipPath={`url(#${maskId})`} className="mask-image" onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); setDraggingMask(true); }} />}{points.map((point, index) => <g key={index} className="vertex-handle"><circle cx={point.x} cy={point.y} r="15" className="handle-hit" onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); setActivePoint(index); }} /><circle cx={point.x} cy={point.y} r="5.5" className="handle-dot" /></g>)}</svg></section></main>;
 }
